@@ -7,7 +7,6 @@ from fastapi.templating import Jinja2Templates
 from database import SessionLocal, engine
 import models
 from sqlalchemy.orm import Session
-import models
 
 
 # headers = {'Accept': 'application/json'}
@@ -67,7 +66,13 @@ async def login(request: Request):
 @app.get("/curator/", response_class=HTMLResponse)
 async def curator(request: Request, db: Session = Depends(get_db)):
     students = db.query(models.Student).filter(models.Student.Manager=="Уалиева Сауле Абзаловна").all()
-    return templates.TemplateResponse("curator.html", context={"request": request, "students": students})
+    
+    return templates.TemplateResponse("curator.html", context={"request": request, "students": students, "classes": await users_class("Уалиева Сауле Абзаловна", db)})
+
+async def users_class(students, db):
+    classes = db.query(models.Student.DivisionName).filter(models.Student.Manager=="Уалиева Сауле Абзаловна").all()
+    classes = list(map(lambda x: x[0],list({*classes})))
+    return classes
 
 @app.get("/admin/", response_class=HTMLResponse)
 async def admin(request: Request):
