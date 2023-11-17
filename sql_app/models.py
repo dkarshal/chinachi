@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Boolean
 
-from .database import Base
+from database import Base
 
 
 class Film(Base):
@@ -25,3 +25,6 @@ class Student(Base):
     DaysNoInScool = Column(Integer)
     DaysNoOutScool = Column(Integer)
     Manager = Column(String, nullable=False)
+
+    def __repr__(self):
+        return " ".join((self.DisplayNameAll, self.DivisionName))

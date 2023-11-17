@@ -2,7 +2,7 @@ import httpx, asyncio
 from typing import Optional
 from fastapi import FastAPI, Request, Header, Depends
 from fastapi.responses import HTMLResponse
-from sql_app.database import SessionLocal, engine
+from database import SessionLocal, engine
 from sqlalchemy.orm import Session
 
 

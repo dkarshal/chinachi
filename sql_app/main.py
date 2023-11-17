@@ -1,13 +1,13 @@
 import requests
-import sql_app.school_api
+import school_api
 from typing import Optional
 from fastapi import FastAPI, Request, Header, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from .database import SessionLocal, engine
-from . import models
+from database import SessionLocal, engine
+import models
 from sqlalchemy.orm import Session
-from .models import Student
+import models
 
 
 # headers = {'Accept': 'application/json'}
@@ -18,7 +18,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-templates = Jinja2Templates(directory="sql_app/templates")
+templates = Jinja2Templates(directory="templates")
 
 async def get_db():
     db = SessionLocal()
@@ -29,11 +29,11 @@ async def get_db():
 
 # @app.on_event("startup")
 # async def load():
-#     actual_data = await sql_app.school_api.fetch_data()
+#     actual_data = await school_api.fetch_data()
 #     for student in actual_data:
 #         db=SessionLocal()
 #         print(student)
-#         insert = Student(
+#         insert = models.Student(
 #             ID = int(student["ID"]),
 #             DisplayNameAll = student["DisplayNameAll"],
 #             PostName = student["PostName"],
@@ -65,8 +65,9 @@ async def login(request: Request):
     return templates.TemplateResponse("login.html", context={"request": request})
 
 @app.get("/curator/", response_class=HTMLResponse)
-async def curator(request: Request):
-    return templates.TemplateResponse("curator.html", context={"request": request})
+async def curator(request: Request, db: Session = Depends(get_db)):
+    students = db.query(models.Student).filter(models.Student.Manager=="Уалиева Сауле Абзаловна").all()
+    return templates.TemplateResponse("curator.html", context={"request": request, "students": students})
 
 @app.get("/admin/", response_class=HTMLResponse)
 async def admin(request: Request):
