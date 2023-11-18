@@ -50,6 +50,28 @@ async def get_db():
 #         db.add(insert)
 #         db.commit()
 
+@app.get("/login/", response_class=HTMLResponse)
+async def login(request: Request):
+    return templates.TemplateResponse("login.html", context={"request": request})
+
+@app.get("/curator/", response_class=HTMLResponse)
+async def curator(request: Request, db: Session = Depends(get_db)):
+    students = db.query(models.Student).filter(models.Student.Manager=="Уалиева Сауле Абзаловна").all()
+    
+    return templates.TemplateResponse("curator.html", context={"request": request, "students": students, "classes": await users_class("Уалиева Сауле Абзаловна", db)})
+
+async def users_class(students, db):
+    classes = db.query(models.Student.DivisionName).filter(models.Student.Manager=="Уалиева Сауле Абзаловна").all()
+    classes = list(map(lambda x: x[0],list({*classes})))
+    return classes
+
+@app.get("/admin/", response_class=HTMLResponse)
+async def admin(request: Request, hx_request: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    classes = db.query(models.Student.DivisionName, models.Student.Manager, models.Student.Status).all()
+    classes = sorted(list({*classes}))
+    if hx_request:
+        return templates.TemplateResponse("partials/classes_card.html", context={"request": request, "classes": classes})
+    return templates.TemplateResponse("admin.html", context={"request": request, "classes": classes})
 
 @app.get("/index/", response_class=HTMLResponse)
 async def movielist(request: Request, hx_request: Optional[str] = Header(None), db: Session = Depends(get_db)):
@@ -59,15 +81,3 @@ async def movielist(request: Request, hx_request: Optional[str] = Header(None), 
     if hx_request:
         return templates.TemplateResponse("partials/table.html", context)
     return templates.TemplateResponse("index.html", context)
-
-@app.get("/login/", response_class=HTMLResponse)
-async def login(request: Request):
-    return templates.TemplateResponse("login.html", context={"request": request})
-
-@app.get("/curator/", response_class=HTMLResponse)
-async def curator(request: Request):
-    return templates.TemplateResponse("curator.html", context={"request": request})
-
-@app.get("/admin/", response_class=HTMLResponse)
-async def admin(request: Request):
-    return templates.TemplateResponse("admin.html", context={"request": request})
