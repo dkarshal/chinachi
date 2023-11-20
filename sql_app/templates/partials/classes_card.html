@@ -1,0 +1,56 @@
+<script>
+    function makeGetRequest(diviso) {
+    // Replace the URL with the actual URL of your FastAPI server and route
+    let url = (`/inschool-class-students/${diviso}`);
+    fetch(url)
+        .then(response => response.json())  // Assuming the response is in JSON format
+        .then(data => {
+            console.log('Response:', data);
+
+            // Handle the response data as needed
+            // For example, update the HTML content with the response
+            document.getElementById(diviso).innerHTML = JSON.stringify(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+function makeGetRequest2(diviso) {
+    // Replace the URL with the actual URL of your FastAPI server and route
+    let url = (`/outschool-class-students/${diviso}`);
+    fetch(url)
+        .then(response => response.json())  // Assuming the response is in JSON format
+        .then(data => {
+            console.log('Response:', data);
+
+            // Handle the response data as needed
+            // For example, update the HTML content with the response
+            document.getElementById(diviso).innerHTML = JSON.stringify(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+</script>
+{% for class in classes %}
+    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+            {{ class["DivisionName"] }}
+        </th>
+        <td  class="px-6 py-4">
+            {{ class["Manager"] }}
+        </td>
+        <td id="{{ class['DivisionName']+'2' }}" class="px-6 py-4">
+            <script>
+                makeGetRequest2('{{ class["DivisionName"]+"2"}}');
+            </script>
+            </td>
+        <td  id="{{ class['DivisionName'] }}" class="px-6 py-4">
+            <script>
+                makeGetRequest('{{ class["DivisionName"] }}');
+            </script>
+        </td>
+    </tr>
+{% endfor %}
+
+    

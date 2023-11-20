@@ -27,4 +27,4 @@ class Student(Base):
     Manager = Column(String, nullable=False)
 
     def __repr__(self):
-        return " ".join({"DisplayNameAll: " + self.DisplayNameAll + ", DivisionName: " + self.DivisionName})
+        return " ".join({"DisplayNameAll: " + self.DisplayNameAll + ", DivisionName: " + self.DivisionName + ", Status " + str(self.Status)})
