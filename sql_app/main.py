@@ -2,12 +2,13 @@ import requests
 import school_api
 from typing import Optional
 from fastapi import FastAPI, Request, Header, Depends
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.exceptions import HTTPException
 from fastapi.templating import Jinja2Templates
 from database import SessionLocal, engine
 import models
 from sqlalchemy.orm import Session
+
 
 
 # headers = {'Accept': 'application/json'}
@@ -70,17 +71,22 @@ def read_root():
 def login(request: Request):
     return templates.TemplateResponse("login.html", context={"request": request})
 
-@app.post("/redirect")
-async def redirect(username: str, password: str, request: Request):
-    if username == "admin" and password == "1":
-        return templates.TemplateResponse("admin.html", context={"request": request})
+@app.post("/redirect/", response_class=RedirectResponse)
+async def redirect(request: Request):
+    print(a:= dict(await request.form()))
+    username = a["username"]
+    password = a["password"]
+    if username == "admin" and password == "1": 
+        return RedirectResponse("/admin/")
     elif username == "curator" and password == "1":
-        return templates.TemplateResponse("curator.html", context={"request": request})
+        return RedirectResponse("/curator/Жусупова%20Арай%20Амантаевна")
     else:
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
 @app.get("/curator/{username}", response_class=HTMLResponse)
+@app.post("/curator/{username}", response_class=HTMLResponse)
 async def curator(username: str, request: Request, db: Session = Depends(get_db)):
+    await load()
     students = db.query(models.Student).filter(models.Student.Manager==username).all()
     for student in students:
         if student.Status is True:
@@ -109,9 +115,9 @@ async def update_database(student_id: str, db: Session = Depends(get_db)):
     else:
         return {"message": "Student record wasn't updated successfully"}
 
-
-@app.get("/admin/", response_class=HTMLResponse)
+@app.post("/admin/", response_class=HTMLResponse)
 async def admin(request: Request, hx_request: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    await load()
     classes = db.query(models.Student.DivisionName, models.Student.Manager).all()
     # Assuming classes is a list of tuples like [(division_name1, manager1, status1), ...]
     #classes = sorted(list({(Division, Manager, Status) for Division, Manager, Status in classes}), key=lambda x: x[0])
